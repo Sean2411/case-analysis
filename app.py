@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 from agents.llm import chat_complete, locked_temperature
 from agents.pipeline import AnalysisResult, run_analysis
@@ -19,8 +20,8 @@ from config import (
 )
 from errors import AnalysisError, LLMCallError, ParseError
 from parsers.documents import ParseOutcome, parse_zip_bytes
+from relation_graph import parse_relation_graph, render_relation_html, strip_relation_fence
 from report import split_report
-from sample_case import build_sample_zip
 
 try:
     from local_secrets import DEEPSEEK_API_KEY
@@ -72,14 +73,6 @@ def _render_workspace(config: dict[str, object]) -> None:
     st.caption("上传案件材料压缩包后，系统会整理资料关系、人物/法律关系和法律意见。材料里没有写明的内容不会被补写成事实。本工具只做辅助整理，不构成正式法律意见。")
 
     st.subheader("上传材料")
-    st.download_button(
-        "下载示例材料（zip）",
-        data=build_sample_zip(),
-        file_name="示例案件材料.zip",
-        mime="application/zip",
-        help="虚构的借款材料，可用于熟悉界面。",
-        key="download_sample_zip",
-    )
     uploaded = st.file_uploader("上传案件材料（zip）", type=["zip"])
     if uploaded is None:
         st.session_state.zip_token = None
@@ -219,7 +212,12 @@ def _render_result(result: AnalysisResult) -> None:
 
     doc_tab, person_tab, opinion_tab = st.tabs(["资料关系", "人物/法律关系", "法律意见"])
     doc_tab.markdown(sections["doc"])
-    person_tab.markdown(sections["person"])
+    graph = getattr(result, "relation_graph", None) or parse_relation_graph(sections["person"])
+    if graph:
+        graph_html, graph_height = render_relation_html(graph)
+        with person_tab:
+            components.html(graph_html, height=graph_height, scrolling=False)
+    person_tab.markdown(strip_relation_fence(sections["person"]))
     opinion_tab.markdown(sections["opinion"])
     with st.expander("查看完整 Markdown"):
         st.markdown(result.markdown)

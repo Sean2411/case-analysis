@@ -32,6 +32,7 @@ def run(
 最终输出只能使用下面三个标题，按顺序出现，不要写开场白：
 {headings}
 {law_instruction}
+如果人物关系草稿里有 relation-graph 代码块，原样放在「## 二、人物/法律关系」正文末尾，不要改成 mermaid，也不要改里面的 JSON。
 """
     )
     user = (

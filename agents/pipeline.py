@@ -12,6 +12,7 @@ from config import DISCLAIMER, NO_HIT_NOTE
 from errors import AnalysisError
 from parsers.documents import Document, render_for_prompt
 from rag.retriever import EmbedFn, LawHit, RetrievalResult, retrieve_laws
+from relation_graph import parse_relation_graph
 from report import Drafts, finalize_markdown
 
 ProgressFn = Callable[[str], None]
@@ -23,6 +24,7 @@ class AnalysisResult:
     warnings: list[str]
     laws_loaded: bool
     law_hits: list[LawHit]
+    relation_graph: dict | None = None
 
 
 def run_analysis(
@@ -101,4 +103,5 @@ def run_analysis(
         warnings=warnings,
         laws_loaded=retrieval.loaded,
         law_hits=list(retrieval.hits),
+        relation_graph=parse_relation_graph(person_relation) or parse_relation_graph(markdown),
     )
