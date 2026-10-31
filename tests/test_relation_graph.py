@@ -54,7 +54,9 @@ def test_render_uses_reference_colors_and_escapes_text() -> None:
     assert "#2e8b57" in page
     assert "资金流向" in page
     assert "见于 借款合同.txt" in page
-    assert "<script>" not in page
+    assert "法律关系图" in page
+    assert "主体和人员" in page
+    assert "法院认定" not in page
     assert "&lt;script&gt;" in page
     assert strip_relation_fence(SAMPLE).startswith("张三是借款人")
     assert "relation-graph" not in strip_relation_fence(SAMPLE)
@@ -80,3 +82,23 @@ def test_cards_do_not_overlap() -> None:
             overlap_x = abs(x1 - x2) < 220
             overlap_y = abs(y1 - y2) < (h1 + h2) / 2
             assert not (overlap_x and overlap_y)
+
+
+def test_court_and_entity_fields_are_rendered_without_invention() -> None:
+    text = """
+```relation-graph
+{"title":"张三诉李四借款合同纠纷","nodes":[{"id":"a","name":"张三","role":"client","subtitle":"借款人","source":"借款合同.txt"}],
+ "edges":[],
+ "court":{"title":"法院认定（2024-06-01，某市人民法院）","lines":["双方存在借款合同关系"],"source":"判决书.txt"},
+ "entities":[{"name":"张三","role":"借款人","org":"","gender":"男","id_no":"<id>","source":"借款合同.txt"}]}
+```
+"""
+    graph = parse_relation_graph(text)
+    assert graph is not None
+    assert graph["court"].title.startswith("法院认定")
+    page, _height = render_relation_html(graph)
+    assert "张三诉李四借款合同纠纷" in page
+    assert "双方存在借款合同关系" in page
+    assert "法院认定（2024-06-01，某市人民法院）" in page
+    assert "&lt;id&gt;" in page
+    assert "class=\"court\"" in page

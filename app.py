@@ -216,7 +216,14 @@ def _render_result(result: AnalysisResult) -> None:
     if graph:
         graph_html, graph_height = render_relation_html(graph)
         with person_tab:
-            components.html(graph_html, height=graph_height, scrolling=False)
+            st.download_button(
+                "下载法律关系图（HTML）",
+                data=graph_html.encode("utf-8"),
+                file_name="法律关系图.html",
+                mime="text/html",
+                key="download_relation_html",
+            )
+            components.html(graph_html, height=min(graph_height, 920), scrolling=True)
     person_tab.markdown(strip_relation_fence(sections["person"]))
     opinion_tab.markdown(sections["opinion"])
     with st.expander("查看完整 Markdown"):
