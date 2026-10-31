@@ -1,0 +1,6 @@
+[server]
+# 与解析器的 30MB 上限一致，避免先上传再被拒绝。
+maxUploadSize = 30
+
+[browser]
+gatherUsageStats = false

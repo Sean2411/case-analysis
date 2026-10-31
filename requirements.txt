@@ -1,0 +1,10 @@
+# Web 界面
+streamlit>=1.33
+# OpenAI 兼容接口（DeepSeek 及其他服务）
+openai>=1.40
+# 案件材料解析
+python-docx>=1.1.0
+pypdf>=4.2
+openpyxl>=3.1
+# 自测
+pytest>=8.0
